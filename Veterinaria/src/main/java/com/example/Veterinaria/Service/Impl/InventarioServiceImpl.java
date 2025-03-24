@@ -155,24 +155,23 @@ public class InventarioServiceImpl implements InventarioService {
     @Override
     public List<Inventario> validarStockBajo() {
         try {
-            List<Inventario> productosBajoStock = inventarioRepository.findAll().stream()
-                    .filter(producto -> producto.getStockActual() <= producto.getStockMinimo())
-                    .toList();
-
-            // Notificar para cada producto con stock bajo
-            for (Inventario producto : productosBajoStock) {
-                notificacionService.enviarNotificacionBajoStock(
-                    producto.getNombre(),
-                    producto.getStockActual(),
-                    producto.getStockMinimo()
-                );
-                logger.info("Notificación enviada para producto: {}", producto.getNombre());
+            // Obtener todos los productos con stock bajo (por ejemplo, menos de 10 unidades)
+            List<Inventario> productosStockBajo = inventarioRepository.findByStockActualLessThan(10);
+            
+            if (!productosStockBajo.isEmpty()) {
+                logger.warn("Productos con stock bajo encontrados:");
+                for (Inventario producto : productosStockBajo) {
+                    logger.warn("Producto: {}, Stock actual: {}", 
+                        producto.getNombre(), 
+                        producto.getStockActual());
+                }
+            } else {
+                logger.info("No se encontraron productos con stock bajo");
             }
-
-            return productosBajoStock;
+            return productosStockBajo;
         } catch (Exception e) {
-            logger.error("Error al validar stock bajo: {}", e.getMessage());
-            throw new RuntimeException("Error al validar stock bajo", e);
+            logger.error("Error al verificar stock bajo: {}", e.getMessage(), e);
+            throw new RuntimeException("Error al verificar stock bajo", e);
         }
     }
 

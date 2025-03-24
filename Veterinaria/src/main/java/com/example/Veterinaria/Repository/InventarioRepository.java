@@ -10,6 +10,5 @@ public interface InventarioRepository extends JpaRepository<Inventario, Long> {
     Inventario findByCodigo(String codigo);
     List<Inventario> findByCategoria(String categoria);
     List<Inventario> findByStockActualLessThanEqual(Integer stockMinimo);
-    List<Inventario> findByStockLessThanEqual(Integer stockMinimo);
-    List<Inventario> findByStockLessThan(int cantidad);
+    List<Inventario> findByStockActualLessThan(int cantidad);
 } 
