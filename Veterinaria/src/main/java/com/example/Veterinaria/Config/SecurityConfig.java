@@ -51,11 +51,11 @@ public class SecurityConfig {
                 .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
 
                 // Rutas de Empleados
-                .requestMatchers("/api/empleados/register").hasRole("ADMIN")
-                .requestMatchers(HttpMethod.GET, "/api/empleados/**").hasRole("ADMIN")
-                .requestMatchers(HttpMethod.POST, "/api/empleados/**").hasRole("ADMIN")
-                .requestMatchers(HttpMethod.PUT, "/api/empleados/**").hasRole("ADMIN")
-                .requestMatchers(HttpMethod.DELETE, "/api/empleados/**").hasRole("ADMIN")
+                .requestMatchers("/api/empleados/register").hasAnyRole("ADMIN")
+                .requestMatchers(HttpMethod.GET, "/api/empleados/**").hasAnyRole("ADMIN")
+                .requestMatchers(HttpMethod.POST, "/api/empleados/**").hasAnyRole("ADMIN")
+                .requestMatchers(HttpMethod.PUT, "/api/empleados/**").hasAnyRole("ADMIN")
+                .requestMatchers(HttpMethod.DELETE, "/api/empleados/**").hasAnyRole("ADMIN")
 
                 // Rutas de Clientes
                 .requestMatchers(HttpMethod.GET, "/api/clientes/**").hasAnyRole("ADMIN", "EMPLEADO", "CLIENTE")
@@ -82,8 +82,8 @@ public class SecurityConfig {
 
                 // Rutas de Inventario
                 .requestMatchers(HttpMethod.GET, "/api/inventario/**").hasAnyRole("ADMIN", "EMPLEADO")
-                .requestMatchers(HttpMethod.POST, "/api/inventario/**").hasAnyRole("ADMIN")
-                .requestMatchers(HttpMethod.PUT, "/api/inventario/**").hasAnyRole("ADMIN")
+                .requestMatchers(HttpMethod.POST, "/api/inventario/**").hasAnyRole("ADMIN","EMPLEADO")
+                .requestMatchers(HttpMethod.PUT, "/api/inventario/**").hasAnyRole("ADMIN","EMPLEADO")
                 .requestMatchers(HttpMethod.DELETE, "/api/inventario/**").hasRole("ADMIN")
 
                 // Rutas de Facturas

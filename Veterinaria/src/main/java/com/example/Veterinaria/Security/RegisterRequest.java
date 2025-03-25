@@ -1,20 +1,25 @@
 package com.example.Veterinaria.Security;
 
 import lombok.Data;
+import lombok.AllArgsConstructor;
 
 @Data
+@AllArgsConstructor
 public class RegisterRequest {
+    private String dni;
     private String nombre;
     private String apellido;
-    private String dni;
-    private String email;
     private String password;
+    private String cargo;
+    private String especialidad;
     private String telefono;
+    private String email;
     private String direccion;
-    private String cargo;        // Para empleados
-    private String especialidad; // Para empleados
-    private Double salario;      // Para empleados
-    private String horario;      // Para empleados
+    private Double salario;
+    private String horario;
+    private String genero;
+    private String numeroEmergencia;
+    private String contactoEmergencia;
 
     // Constructor vacío
     public RegisterRequest() {

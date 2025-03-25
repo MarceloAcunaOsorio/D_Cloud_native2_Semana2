@@ -16,8 +16,11 @@ public class InventarioScheduler {
     @Autowired
     private InventarioServiceImpl inventarioServiceImpl; // Cambiamos a usar el Service en lugar del Controller
 
-    // Ejecutar cada día a las 9:00 AM
-    @Scheduled(cron = "0 0 22 * * ?")
+    // El primer 0 son los segundos
+    // El segundo 0 son los minutos
+    // El 23 es la hora en formato 24h
+    // Los * * ? significan "cualquier día del mes, cualquier mes, cualquier día de la semana"
+    @Scheduled(cron = "0 13 23 * * ?")
     public void verificarStockDiario() {
         try {
             logger.info("Iniciando verificación diaria de stock");

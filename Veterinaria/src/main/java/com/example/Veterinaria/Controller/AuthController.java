@@ -18,6 +18,7 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.security.access.prepost.PreAuthorize;
 
+import java.time.LocalDate;
 import java.util.Collection;
 
 @RestController
@@ -104,17 +105,44 @@ public class AuthController {
     }
 
     @PostMapping("/register/empleado")
-    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<?> registerEmpleado(@RequestBody RegisterRequest registerRequest) {
         try {
+            // Verificar si ya existe un empleado con el mismo DNI
+            if (empleadoService.getEmpleadoByDni(registerRequest.getDni()) != null) {
+                return ResponseEntity
+                    .badRequest()
+                    .body("Error: Ya existe un empleado con ese DNI");
+            }
+
             Empleado empleado = new Empleado();
+            
+            // Campos obligatorios (nullable = false)
+            empleado.setDni(registerRequest.getDni());
             empleado.setNombre(registerRequest.getNombre());
             empleado.setApellido(registerRequest.getApellido());
-            empleado.setDni(registerRequest.getDni());
-            empleado.setEmail(registerRequest.getEmail());
             empleado.setPassword(registerRequest.getPassword());
+            empleado.setCargo(registerRequest.getCargo());
+
+            // Campos opcionales
+            empleado.setEspecialidad(registerRequest.getEspecialidad());
             empleado.setTelefono(registerRequest.getTelefono());
+            empleado.setEmail(registerRequest.getEmail());
             empleado.setDireccion(registerRequest.getDireccion());
+            
+            // Fechas
+            empleado.setFechaContratacion(LocalDate.now()); // Fecha actual por defecto
+            empleado.setFechaNacimiento(LocalDate.now());
+            
+            // Información laboral
+            empleado.setSalario(registerRequest.getSalario());
+            empleado.setHorario(registerRequest.getHorario());
+            
+            // Información personal adicional
+            empleado.setGenero(registerRequest.getGenero());
+            empleado.setNumeroEmergencia(registerRequest.getNumeroEmergencia());
+            empleado.setContactoEmergencia(registerRequest.getContactoEmergencia());
+            
+            // Valores por defecto
             empleado.setEstado(true);
 
             Empleado registeredEmpleado = empleadoService.saveEmpleado(empleado);

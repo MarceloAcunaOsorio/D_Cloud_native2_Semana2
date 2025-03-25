@@ -4,14 +4,21 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
+import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 @Service
 public class NotificacionService {
+
+    private static final Logger logger = LoggerFactory.getLogger(NotificacionService.class);
 
     @Value("${notification.serverless.url}")
     private String serverlessUrl;
@@ -36,10 +43,19 @@ public class NotificacionService {
                 producto, stockActual, stockMinimo));
 
             HttpEntity<Map<String, Object>> request = new HttpEntity<>(payload, headers);
-            restTemplate.postForEntity(serverlessUrl, request, String.class);
+            
+            // Enviar y registrar respuesta
+            ResponseEntity<String> response = restTemplate.postForEntity(serverlessUrl, request, String.class);
+            
+            if (response.getStatusCode().is2xxSuccessful()) {
+                logger.info("✅ Notificación enviada correctamente a las {} | Producto: {}, Stock: {}",
+                    LocalDateTime.now(), producto, stockActual);
+            } else {
+                logger.error("X Error al enviar notificación (Código {}): {}",
+                    response.getStatusCode(), response.getBody());
+            }
         } catch (Exception e) {
-            // Log error pero no interrumpir el flujo principal
-            System.err.println("Error enviando notificación: " + e.getMessage());
+            logger.error("X Error enviando notificación: {}", e.getMessage(), e);
         }
     }
-} 
+}

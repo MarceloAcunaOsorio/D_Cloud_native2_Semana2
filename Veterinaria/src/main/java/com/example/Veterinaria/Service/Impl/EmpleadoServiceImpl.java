@@ -10,6 +10,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
@@ -21,9 +22,7 @@ import java.util.Optional;
 @Transactional
 public class EmpleadoServiceImpl implements EmpleadoService {
 
-    /**
-     * Repositorio para realizar operaciones CRUD con la entidad Empleado
-     */
+
     @Autowired
     private EmpleadoRepository empleadoRepository;
 
@@ -33,53 +32,49 @@ public class EmpleadoServiceImpl implements EmpleadoService {
     @Autowired
     private PasswordEncoder passwordEncoder;
 
-    /**
-     * Recupera todos los empleados de la base de datos
-     * @return Lista con todos los empleados encontrados
-     */
     @Override
     public List<Empleado> getAllEmpleados() {
         return empleadoRepository.findAll();
     }
 
-    /**
-     * Busca un empleado específico por su ID
-     * @param id Identificador único del empleado
-     * @return Optional conteniendo el empleado si existe
-     */
     @Override
     public Optional<Empleado> getEmpleadoById(Long id) {
         return empleadoRepository.findById(id);
     }
 
-    /**
-     * Busca un empleado por su número de DNI
-     * @param dni Número de documento de identidad del empleado
-     * @return Empleado encontrado o null si no existe
-     */
     @Override
     public Empleado getEmpleadoByDni(String dni) {
         return empleadoRepository.findByDni(dni);
     }
 
-    /**
-     * Busca empleados por su cargo
-     * @param cargo Cargo del empleado (VETERINARIO, ASISTENTE, etc.)
-     * @return Lista de empleados con el cargo especificado
-     */
+
     @Override
     public List<Empleado> findByCargo(String cargo) {
         return empleadoRepository.findByCargo(cargo);
     }
 
-    /**
-     * Guarda un nuevo empleado en la base de datos
-     * @param empleado Datos del empleado a guardar
-     * @return Empleado guardado con su ID generado
-     * @throws RuntimeException si ya existe un empleado con el mismo DNI o si la contraseña es nula
-     */
+
     @Override
     public Empleado saveEmpleado(Empleado empleado) {
+        // Logs detallados para depuración
+        System.out.println("=== Debug Información Empleado ===");
+        System.out.println("Empleado completo: " + empleado);
+        System.out.println("DNI: " + empleado.getDni());
+        System.out.println("Nombre: " + empleado.getNombre());
+        System.out.println("Cargo: " + empleado.getCargo());
+        System.out.println("==============================");
+        
+    
+        // Validar cargo primero
+        if (empleado.getCargo() == null) {
+            throw new IllegalArgumentException("El cargo no puede ser nulo");
+        }
+    
+        // Resto de validaciones...
+        if (empleado.getDni() != null && empleadoRepository.findByDni(empleado.getDni()) != null) {
+            throw new RuntimeException("Ya existe un empleado con ese DNI");
+        }
+    
         if (empleado.getDni() != null && empleadoRepository.findByDni(empleado.getDni()) != null) {
             throw new RuntimeException("Ya existe un empleado con ese DNI");
         }
@@ -97,25 +92,52 @@ public class EmpleadoServiceImpl implements EmpleadoService {
             empleado.getRoles().add(rolEmpleado);
         }
 
-        return empleadoRepository.save(empleado);
-    }
+        // Validar cargo - Mejorada la validación
+        if (empleado.getCargo() == null) {
+            throw new IllegalArgumentException("El cargo no puede ser nulo");
+        }
 
-    /**
-     * Elimina un empleado de la base de datos
-     * @param id Identificador único del empleado a eliminar
-     */
+        String cargo = empleado.getCargo().trim();
+        if (cargo.isEmpty()) {
+            throw new IllegalArgumentException("El cargo no puede estar vacío");
+        }
+
+        // Validar que sea un cargo válido
+        if (!isValidCargo(cargo)) {
+            throw new IllegalArgumentException("Cargo no válido. Los cargos permitidos son: Veterinario, Asistente, Recepcionista");
+        }
+
+        // Normalizar el cargo
+        empleado.setCargo(cargo);
+        
+        // Establecer valores por defecto
+        if (empleado.getEstado() == null) {
+            empleado.setEstado(true);
+        }
+
+        // Guardar el empleado con try-catch mejorado
+        try {
+            return empleadoRepository.save(empleado);
+        } catch (Exception e) {
+            System.err.println("Error al guardar empleado: " + e.getMessage());
+            e.printStackTrace();
+            throw new RuntimeException("Error al guardar el empleado: " + e.getMessage());
+        }
+}
+
+private boolean isValidCargo(String cargo) {
+    List<String> cargosValidos = Arrays.asList("Veterinario", "Asistente", "Recepcionista");
+    return cargosValidos.contains(cargo);
+}
+    
+
+
     @Override
     public void deleteEmpleadoById(Long id) {
         empleadoRepository.deleteById(id);
     }
 
-    /**
-     * Actualiza los datos de un empleado existente
-     * @param id Identificador único del empleado a actualizar
-     * @param empleadoDetails Nuevos datos del empleado
-     * @return Empleado actualizado
-     * @throws RuntimeException si el empleado no existe o si el nuevo DNI ya está en uso
-     */
+
     @Override
     public Empleado updateEmpleado(Long id, Empleado empleadoDetails) {
         return empleadoRepository.findById(id)

@@ -4,6 +4,8 @@ import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+
+import java.sql.Date;
 import java.time.LocalDate;
 import java.util.HashSet;
 import java.util.Set;
@@ -59,7 +61,7 @@ public class Empleado {
     private Boolean estado;
 
     @Column(name = "FECHA_NACIMIENTO")
-    private LocalDate fechaNacimiento;
+    private LocalDate  fechaNacimiento;
 
     @Column(name = "GENERO", length = 1)
     private String genero;

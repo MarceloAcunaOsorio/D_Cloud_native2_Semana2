@@ -91,7 +91,7 @@ public class InventarioController {
     // Nuevo endpoint para verificar todo el inventario bajo
     @GetMapping("/verificar-stock")
     public ResponseEntity<?> verificarStockBajo() {
-        List<Inventario> inventarioBajo = inventarioRepository.findByStockActualLessThanEqual(0);
+        List<Inventario> inventarioBajo = inventarioRepository.findByStockActualLessThanEqual(15);
         
         for (Inventario item : inventarioBajo) {
             notificacionService.enviarNotificacionBajoStock(
