@@ -96,7 +96,12 @@ public class EmpleadoController {
                 .map(item -> item.getAuthority())
                 .orElse("ROLE_EMPLEADO");
             
-            return ResponseEntity.ok(new JwtResponse(jwt, userDetails.getUsername(), role));
+            return ResponseEntity.ok(new JwtResponse(
+                jwt, 
+                userDetails.getUsername(), 
+                role,
+                "Bearer"
+            ));
         } catch (Exception e) {
             return ResponseEntity
                 .badRequest()

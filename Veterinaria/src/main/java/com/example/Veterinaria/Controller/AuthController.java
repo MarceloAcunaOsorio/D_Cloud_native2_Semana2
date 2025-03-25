@@ -3,9 +3,9 @@ package com.example.Veterinaria.Controller;
 import com.example.Veterinaria.Model.Cliente;
 import com.example.Veterinaria.Model.Empleado;
 import com.example.Veterinaria.Security.JwtProvider;
+import com.example.Veterinaria.Security.RegisterRequest;
 import com.example.Veterinaria.Security.LoginRequest;
 import com.example.Veterinaria.Security.JwtResponse;
-import com.example.Veterinaria.Security.RegisterRequest;
 import com.example.Veterinaria.Service.ClienteService;
 import com.example.Veterinaria.Service.EmpleadoService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,9 +14,11 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.security.access.prepost.PreAuthorize;
+
+import java.util.Collection;
 
 @RestController
 @RequestMapping("/api/auth")
@@ -36,31 +38,30 @@ public class AuthController {
     private EmpleadoService empleadoService;
 
     @PostMapping("/login")
-    public ResponseEntity<?> authenticateUser(@RequestBody LoginRequest loginRequest) {
-        try {
-            Authentication authentication = authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(
-                    loginRequest.getUsername(),
-                    loginRequest.getPassword()
-                )
-            );
-
-            SecurityContextHolder.getContext().setAuthentication(authentication);
-            String jwt = jwtProvider.generateToken(authentication);
-            
-            UserDetails userDetails = (UserDetails) authentication.getPrincipal();
-            String role = userDetails.getAuthorities().stream()
+    public ResponseEntity<JwtResponse> authenticateUser(@RequestBody LoginRequest loginRequest) {
+        Authentication authentication = authenticationManager.authenticate(
+            new UsernamePasswordAuthenticationToken(
+                loginRequest.getUsername(), 
+                loginRequest.getPassword()
+            )
+        );
+        
+        SecurityContextHolder.getContext().setAuthentication(authentication);
+        
+        String token = jwtProvider.generateToken(authentication);
+        
+        Collection<? extends GrantedAuthority> authorities = authentication.getAuthorities();
+        String role = authorities.stream()
+                .map(GrantedAuthority::getAuthority)
                 .findFirst()
-                .map(item -> item.getAuthority())
                 .orElse("");
-
-            return ResponseEntity.ok(new JwtResponse(jwt, userDetails.getUsername(), role));
-            
-        } catch (Exception e) {
-            return ResponseEntity
-                .badRequest()
-                .body("Error en la autenticación: " + e.getMessage());
-        }
+        
+        return ResponseEntity.ok(new JwtResponse(
+            token,
+            loginRequest.getUsername(),
+            role,
+            "Bearer"
+        ));
     }
 
     @PostMapping("/register/cliente")
@@ -89,7 +90,12 @@ public class AuthController {
             SecurityContextHolder.getContext().setAuthentication(authentication);
             String jwt = jwtProvider.generateToken(authentication);
 
-            return ResponseEntity.ok(new JwtResponse(jwt, registeredCliente.getDni(), "ROLE_CLIENTE"));
+            return ResponseEntity.ok(new JwtResponse(
+                jwt,
+                registeredCliente.getDni(),
+                "ROLE_CLIENTE",
+                "Bearer"
+            ));
         } catch (Exception e) {
             return ResponseEntity
                 .badRequest()

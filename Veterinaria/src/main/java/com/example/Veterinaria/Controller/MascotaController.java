@@ -1,9 +1,12 @@
 package com.example.Veterinaria.Controller;
 
+import com.example.Veterinaria.Model.Cliente;
 import com.example.Veterinaria.Model.Mascota;
 import com.example.Veterinaria.Repository.MascotaRepository;
+import com.example.Veterinaria.Repository.ClienteRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -15,6 +18,9 @@ public class MascotaController {
 
     @Autowired
     private MascotaRepository mascotaRepository;
+
+    @Autowired
+    private ClienteRepository clienteRepository;
 
     @GetMapping
     public List<Mascota> getAllMascotas() {
@@ -34,8 +40,27 @@ public class MascotaController {
     }
 
     @PostMapping
-    public Mascota createMascota(@RequestBody Mascota mascota) {
-        return mascotaRepository.save(mascota);
+    @PreAuthorize("hasRole('ROLE_CLIENTE') or hasRole('ROLE_ADMIN')")
+    public ResponseEntity<?> createMascota(@RequestBody Mascota mascota) {
+        // Validar que el cliente no sea nulo
+        if (mascota.getCliente() == null || mascota.getCliente().getId() == null) {
+            return ResponseEntity
+                .badRequest()
+                .body("El cliente es requerido para crear una mascota");
+        }
+        
+        // Verificar que el cliente existe
+        Cliente cliente = clienteRepository.findById(mascota.getCliente().getId())
+            .orElse(null);
+        if (cliente == null) {
+            return ResponseEntity
+                .badRequest()
+                .body("El cliente especificado no existe");
+        }
+        
+        mascota.setCliente(cliente);
+        Mascota nuevaMascota = mascotaRepository.save(mascota);
+        return ResponseEntity.ok(nuevaMascota);
     }
 
     @PutMapping("/{id}")

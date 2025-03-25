@@ -1,14 +1,14 @@
 package com.example.Veterinaria.Security;
 
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.annotation.Configuration;
+import org.springframework.stereotype.Component;
 
-@Configuration
+@Component
 public class JwtConfig {
-    @Value("${jwt.secret}")
+    @Value("${app.jwt-secret}")
     private String secret;
 
-    @Value("${jwt.expiration}")
+    @Value("${app.jwt-expiration-milliseconds}")
     private int expiration;
 
     public String getSecret() {

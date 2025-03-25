@@ -64,8 +64,8 @@ public class SecurityConfig {
 
                 // Rutas de Mascotas
                 .requestMatchers(HttpMethod.GET, "/api/mascotas/**").hasAnyRole("ADMIN", "EMPLEADO", "CLIENTE")
-                .requestMatchers(HttpMethod.POST, "/api/mascotas/**").hasAnyRole("ADMIN", "EMPLEADO")
-                .requestMatchers(HttpMethod.PUT, "/api/mascotas/**").hasAnyRole("ADMIN", "EMPLEADO")
+                .requestMatchers(HttpMethod.POST, "/api/mascotas/**").hasAnyRole("ADMIN", "EMPLEADO", "CLIENTE")
+                .requestMatchers(HttpMethod.PUT, "/api/mascotas/**").hasAnyRole("ADMIN", "EMPLEADO", "CLIENTE")
                 .requestMatchers(HttpMethod.DELETE, "/api/mascotas/**").hasRole("ADMIN")
 
                 // Rutas de Citas

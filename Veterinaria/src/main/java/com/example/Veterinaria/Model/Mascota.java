@@ -37,7 +37,7 @@ public class Mascota {
     @Column(name = "ESTADO")
     private Boolean estado;
 
-    @ManyToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name = "CLIENTE_ID", nullable = false)
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "cliente_id", nullable = false)
     private Cliente cliente;
 } 
